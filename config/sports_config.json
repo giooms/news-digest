@@ -3,10 +3,10 @@
     "max_articles": 10,
     "rss_feeds": [
         "https://www.formula1.com/en/latest/all.xml",
-        "https://www.lesoir.be/rss/42367/cible_principale", // Belgian football news
-        "https://www.lesoir.be/rss/42368/cible_principale", // International football news
-        "https://www.lesoir.be/rss/31883/cible_principale", // Red Devils news
-        "https://www.lesoir.be/rss/31886/cible_principale", // Cycling news
+        "https://www.lesoir.be/rss/42367/cible_principale",
+        "https://www.lesoir.be/rss/42368/cible_principale",
+        "https://www.lesoir.be/rss/31883/cible_principale",
+        "https://www.lesoir.be/rss/31886/cible_principale",
         "https://www.tennis.com/rss"
     ],
     "preferences": "My sports preferences for ranking articles:\n\nFormula 1:\n- Priority teams: Ferrari, McLaren, RedBull, Mercedes\n- Priority drivers: Leclerc, Hamilton, Piastri, Verstappen, Norris, Russell, Antonelli\n\nFootball:\n- Clubs: FC Barcelona, Standard de Liège, AC Milan, Chelsea FC, Belgium National Team\n- Competitions: UEFA Champion's League, Club World Cup, Country World Cup\n\nCyclism:\n- Athletes: Van Aert, Evenepoel, Pogacar, Van der Poel\n- Competitions: Flemish Classics, Walloon Classics, Paris Roubaix, World Championships, Giro d'Italia, Tour de France, Vuelta a España, Olympics\n\nTennis:\n- Only Grand Slam results or final-stage coverage",
