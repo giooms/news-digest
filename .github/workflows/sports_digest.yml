@@ -29,5 +29,5 @@ jobs:
     - name: Run sports digest
       env:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        DISCORD_WEBHOOK_URL: ${{ secrets.SPORTS_DISCORD_WEBHOOK_URL }}
+        SPORTS_DISCORD_WEBHOOK_URL: ${{ secrets.SPORTS_DISCORD_WEBHOOK_URL }}
       run: python main.py sports
