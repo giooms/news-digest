@@ -22,6 +22,8 @@ class FinanceDigest(BaseDigest):
         3. Summarize each selected article in 2-3 sentences
         4. Focus on actionable insights and market-moving events
 
+        IMPORTANT: Use only standard ASCII quotes (") and apostrophes (') in your response. Avoid smart quotes, curly quotes, or any special Unicode characters.
+
         Return ONLY a valid JSON object in this exact format, as plain text (not in code blocks or markdown):
         {{
             "articles": [

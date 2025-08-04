@@ -106,13 +106,15 @@ class BaseDigest(ABC):
 
         try:
             response = self.model.generate_content(prompt)
-            # Parse JSON response
-            json_response = json.loads(response.text.strip())
+            # Clean and parse JSON response
+            cleaned_response = self._clean_json_response(response.text.strip())
+            json_response = json.loads(cleaned_response)
             return json_response
 
         except json.JSONDecodeError as e:
             print(f"Error parsing JSON from Gemini: {str(e)}")
             print(f"Raw response: {response.text}")
+            print(f"Cleaned response: {self._clean_json_response(response.text.strip())}")
             return {"articles": [], "error": f"Failed to parse JSON response: {str(e)}"}
 
         except Exception as e:
@@ -175,6 +177,27 @@ class BaseDigest(ABC):
     def get_embed_color(self) -> int:
         """Get the color for Discord embeds. Can be overridden by subclasses."""
         return int(self.config.get('embed_color', '0x00ff00'), 16)
+
+    def _clean_json_response(self, response_text: str) -> str:
+        """Clean the JSON response to handle problematic characters."""
+        # Replace problematic quote characters with standard quotes
+        cleaned = response_text
+
+        # Replace smart quotes and other problematic characters
+        replacements = {
+            "'": "'",  # Left single quotation mark
+            "'": "'",  # Right single quotation mark
+            """: '"',  # Left double quotation mark
+            """: '"',  # Right double quotation mark
+            "–": "-",  # En dash
+            "—": "-",  # Em dash
+            "…": "...", # Horizontal ellipsis
+        }
+
+        for old_char, new_char in replacements.items():
+            cleaned = cleaned.replace(old_char, new_char)
+
+        return cleaned
 
     def run(self):
         """Main execution function."""
