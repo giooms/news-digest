@@ -1,6 +1,6 @@
 {
     "digest_type": "Finance",
-    "max_articles": 10,
+    "max_articles": 15,
     "rss_feeds": [
         "https://feeds.bloomberg.com/politics/news.rss",
         "https://feeds.reuters.com/reuters/businessNews",

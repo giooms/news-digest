@@ -1,6 +1,6 @@
 {
     "digest_type": "Sports",
-    "max_articles": 10,
+    "max_articles": 15,
     "rss_feeds": [
         "https://www.formula1.com/en/latest/all.xml",
         "http://rss.rtbf.be/article/rss/highlight_rtbfsport_sport-moteurs-formule-1.xml",

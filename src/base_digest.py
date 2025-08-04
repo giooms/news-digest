@@ -36,7 +36,7 @@ class BaseDigest(ABC):
         self.digest_type = config.get('digest_type', 'General')
         self.rss_feeds = config.get('rss_feeds', [])
         self.preferences = config.get('preferences', '')
-        self.max_articles = config.get('max_articles', 10)
+        self.max_articles = config.get('max_articles', 15)
 
     def fetch_rss_articles(self) -> List[Dict]:
         """Fetch articles from all RSS feeds."""

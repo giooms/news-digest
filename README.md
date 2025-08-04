@@ -62,7 +62,7 @@ Each digest type has its own configuration file in the `config/` directory:
 ```json
 {
     "digest_type": "Sports",
-    "max_articles": 10,
+    "max_articles": 15,
     "rss_feeds": [
         "https://example.com/rss1",
         "https://example.com/rss2"
