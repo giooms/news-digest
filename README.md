@@ -9,7 +9,6 @@ A modular news digest system that can handle multiple types of news categories (
 - **Multiple Discord Channels**: Each digest type can use its own Discord webhook
 - **Configurable**: Each digest type has its own configuration file
 - **RSS Feed Support**: Fetches articles from multiple RSS feeds
-- **24-Hour Filtering**: Only processes articles from the last 24 hours
 
 ## Setup
 
@@ -49,14 +48,6 @@ python main.py sports
 
 # Run finance digest
 python main.py finance
-```
-
-### Legacy Support
-
-The original `sports_digest.py` is still available for backward compatibility:
-
-```bash
-python sports_digest.py
 ```
 
 ## Configuration
@@ -118,7 +109,6 @@ class TechnologyDigest(BaseDigest):
 ```
 sports-digest/
 ├── main.py                     # Main entry point
-├── sports_digest.py           # Legacy sports digest runner
 ├── requirements.txt           # Python dependencies
 ├── config/                    # Configuration files
 │   ├── sports_config.json    # Sports digest config
@@ -185,7 +175,6 @@ Each digest sends:
 
 4. **No articles found**
    - Check if RSS feeds are accessible
-   - Verify articles are from the last 24 hours
    - Check if the AI curation preferences are too restrictive
 
 ## License
