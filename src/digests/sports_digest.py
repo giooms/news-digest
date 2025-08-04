@@ -21,7 +21,7 @@ class SportsDigest(BaseDigest):
         2. Ensure variety across different sports (don't pick {self.max_articles} articles from the same sport)
         3. Summarize each selected article in 2-3 sentences
 
-        IMPORTANT: Use only standard ASCII quotes (") and apostrophes (') in your response. Avoid smart quotes, curly quotes, or any special Unicode characters.
+        IMPORTANT: Use only standard ASCII quotes (") and apostrophes (') in your response. Avoid smart quotes, curly quotes, or any special Unicode characters. When generating JSON or text with nested quotes, always use " (double quotes) for enclosing strings and ' (single quotes) for any inner quotes inside those strings.
 
         Return ONLY a valid JSON object in this exact format, as plain text (not in code blocks or markdown):
         {{
