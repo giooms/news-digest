@@ -198,15 +198,28 @@ class BaseDigest(ABC):
                 lines = lines[:-1]  # Remove last line (```)
             cleaned = '\n'.join(lines)
         
-        # Replace smart quotes and other problematic characters
+        # Replace ALL types of smart quotes and special characters with standard ones
         replacements = {
+            # Single quotes
             "'": "'",  # Left single quotation mark
             "'": "'",  # Right single quotation mark
+            "‚": "'",  # Single low-9 quotation mark
+            "‛": "'",  # Single high-reversed-9 quotation mark
+            "`": "'",  # Grave accent
+            "´": "'",  # Acute accent
+            # Double quotes
             """: '"',  # Left double quotation mark
             """: '"',  # Right double quotation mark
+            "„": '"',  # Double low-9 quotation mark
+            "‟": '"',  # Double high-reversed-9 quotation mark
+            "«": '"',  # Left-pointing double angle quotation mark
+            "»": '"',  # Right-pointing double angle quotation mark
+            # Dashes
             "–": "-",  # En dash
             "—": "-",  # Em dash
-            "…": "...", # Horizontal ellipsis
+            "−": "-",  # Minus sign
+            # Other
+            "…": "...",  # Horizontal ellipsis
         }
 
         for old_char, new_char in replacements.items():
