@@ -40,7 +40,7 @@ def load_config(digest_type: str) -> Dict:
     Load configuration for the specified digest type.
 
     Args:
-        digest_type: The type of digest (e.g., 'sports', 'finance')
+        digest_type: The type of digest (e.g., 'belgium_politics', 'world_politics')
 
     Returns:
         Dictionary containing the configuration

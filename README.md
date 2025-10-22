@@ -107,15 +107,15 @@ Each digest type has its own configuration file in the `config/` directory:
 
 ```json
 {
-    "digest_type": "Sports",
+    "digest_type": "Belgium Politics",
     "max_articles": 15,
     "rss_feeds": [
         "https://example.com/rss1",
         "https://example.com/rss2"
     ],
     "preferences": "Your detailed preferences for article curation...",
-    "discord_webhook_env": "SPORTS_DISCORD_WEBHOOK_URL",
-    "embed_color": "0x00ff00"
+    "discord_webhook_env": "BE_POLITICS_DISCORD_WEBHOOK_URL",
+    "embed_color": "0x0099ff"
 }
 ```
 
