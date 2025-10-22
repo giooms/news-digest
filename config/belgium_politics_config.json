@@ -1,0 +1,13 @@
+{
+    "digest_type": "Belgium Politics",
+    "max_articles": 15,
+    "rss_feeds": [
+        "https://www.lecho.be/rss/politique_belgique.xml",
+        "https://www.lalibre.be/arc/outboundfeeds/rss/section/belgique/?outputType=xml",
+        "https://news.google.com/rss/search?q=site%3Areuters.com&hl=en-US&gl=US&ceid=US%3Aen",
+        "https://feeds.finance.yahoo.com/rss/2.0/headline"
+    ],
+    "preferences": "My Belgium politics preferences for ranking articles:\n\nKey Issues:\n- Government policies and reforms\n- Political party positions and debates\n- Elections and voting behavior\n\nSectors of Interest:\n- Immigration and integration\n- Economic policy and taxation\n- Environmental issues and climate policy\n\nPublic Opinion:\n- Polling data and voter sentiment\n- Social movements and protests\n- Media coverage and analysis",
+    "discord_webhook_env": "BE_POLITICS_DISCORD_WEBHOOK_URL",
+    "embed_color": "0x0099ff"
+}

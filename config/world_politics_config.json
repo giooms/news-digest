@@ -1,0 +1,15 @@
+{
+    "digest_type": "World Politics",
+    "max_articles": 15,
+    "rss_feeds": [
+        "https://www.lalibre.be/arc/outboundfeeds/rss/section/international/?outputType=xml",
+        "https://www.lecho.be/rss/politique_internationale.xml",
+        "https://www.lecho.be/rss/politique_europe.xml",
+
+        "https://news.google.com/rss/search?q=site%3Areuters.com&hl=en-US&gl=US&ceid=US%3Aen",
+        "https://feeds.bbci.co.uk/news/world/rss.xml"
+    ],
+    "preferences": "My world news and politics preferences for ranking articles:\n\nGeographic focus:\n- Primary regions: Europe, North America, Sub-Saharan Africa, Middle East\n- Priority countries: United States, United Kingdom, France, Germany, Belgium, China, Russia, Ukraine, India\n\nTopics and beats:\n- International diplomacy and treaties\n- Elections, government changes, and political parties\n- Conflicts, security, sanctions, and peace processes\n- Human rights, migration, and refugee crises\n- Economic policy, trade agreements, and energy security\n- Climate policy and geopolitics\n\nActors and institutions:\n- Heads of state and government, foreign ministers, major opposition figures\n- International organizations: UN, EU, NATO, WTO\n- Major corporations when directly tied to policy or geopolitics\n\nTone and relevance:\n- Prioritize factual reporting, official statements, investigative journalism\n- High priority for breaking developments and verified on-the-ground reports\n- Lower priority for opinion pieces unless from leading analysts or major outlets\n\nKeywords to prioritize:\n- election, summit, sanctions, ceasefire, peace talks, treaty, impeachment, referendum, human rights, sanctions, crisis\n\nLanguage and sources:\n- Prefer reputable international outlets and trusted local sources; English or reliable translations\n\n",
+    "discord_webhook_env": "WORLD_NEWS_DISCORD_WEBHOOK_URL",
+    "embed_color": "0x00ff00"
+}

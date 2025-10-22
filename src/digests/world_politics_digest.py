@@ -2,25 +2,25 @@ from src.base_digest import BaseDigest
 from typing import Dict
 
 
-class FinanceDigest(BaseDigest):
-    """Finance-specific news digest."""
+class WorldPoliticsDigest(BaseDigest):
+    """World politics and international news digest."""
 
     def get_digest_emoji(self) -> str:
         """Return the emoji to use in Discord messages."""
-        return "💰"
+        return "🌍"
 
     def get_curation_prompt(self, articles_text: str) -> str:
-        """Generate the AI prompt for finance article curation."""
+        """Generate the AI prompt for world politics article curation."""
         return f"""
-        You are a financial news curator. Below are financial articles from the last 24 hours.
+        You are an international news and world politics curator. Below are international political articles from the last 24 hours.
 
         {self.preferences}
 
         Please:
-        1. Select the {self.max_articles} most relevant and interesting articles based on my preferences and general financial newsworthiness
-        2. Ensure variety across different financial topics (stocks, crypto, markets, economics, etc.)
+        1. Select the {self.max_articles} most relevant and interesting articles based on my preferences and general international newsworthiness
+        2. Ensure variety across different regions and topics (diplomacy, conflicts, elections, international organizations, etc.)
         3. Summarize each selected article in 2-3 sentences
-        4. Focus on actionable insights and market-moving events
+        4. Prioritize breaking developments, verified reports, and significant geopolitical events
 
         IMPORTANT: Use only standard ASCII quotes (") and apostrophes (') in your response. Avoid smart quotes, curly quotes, or any special Unicode characters.
 
@@ -28,7 +28,7 @@ class FinanceDigest(BaseDigest):
         {{
             "articles": [
                 {{
-                    "category": "Stocks",
+                    "category": "International Diplomacy",
                     "title": "Article title",
                     "summary": "2-3 sentence summary of the article",
                     "link": "original article link"

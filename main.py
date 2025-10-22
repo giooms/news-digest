@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 """
-Generic News Digest Runner
+Political News Digest Runner
 
-This script can run different types of news digests (sports, finance, etc.)
+This script runs political news digests for Belgium and international news.
 Each digest type has its own configuration file and Discord webhook.
 
 Usage:
     python main.py <digest_type>
 
 Example:
-    python main.py sports
-    python main.py finance
+    python main.py belgium_politics
+    python main.py world_politics
 
 Environment Variables Required:
 - GEMINI_API_KEY: Your Google Gemini API key
-- <DIGEST_TYPE>_DISCORD_WEBHOOK_URL: Discord webhook URL for each digest type
-  (e.g., SPORTS_DISCORD_WEBHOOK_URL, FINANCE_DISCORD_WEBHOOK_URL)
+- BE_POLITICS_DISCORD_WEBHOOK_URL: Discord webhook for Belgium politics
+- WORLD_NEWS_DISCORD_WEBHOOK_URL: Discord webhook for world politics
 """
 
 import sys
@@ -24,14 +24,14 @@ import os
 from pathlib import Path
 from typing import Dict, Type
 from src.base_digest import BaseDigest
-from src.digests.sports_digest import SportsDigest
-from src.digests.finance_digest import FinanceDigest
+from src.digests.belgium_politics_digest import BelgiumPoliticsDigest
+from src.digests.world_politics_digest import WorldPoliticsDigest
 
 
 # Registry of available digest types
 DIGEST_REGISTRY: Dict[str, Type[BaseDigest]] = {
-    'sports': SportsDigest,
-    'finance': FinanceDigest,
+    'belgium_politics': BelgiumPoliticsDigest,
+    'world_politics': WorldPoliticsDigest,
 }
 
 
