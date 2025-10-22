@@ -24,7 +24,7 @@ class BaseDigest(ABC):
             raise ValueError("GEMINI_API_KEY environment variable is required")
 
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        self.model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
         # Get Discord webhook URL from the environment variable specified in config
         discord_webhook_env = config.get('discord_webhook_env', 'DISCORD_WEBHOOK_URL')
