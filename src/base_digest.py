@@ -185,10 +185,19 @@ class BaseDigest(ABC):
         return int(self.config.get('embed_color', '0x00ff00'), 16)
 
     def _clean_json_response(self, response_text: str) -> str:
-        """Clean the JSON response to handle problematic characters."""
-        # Replace problematic quote characters with standard quotes
-        cleaned = response_text
-
+        """Clean the JSON response to handle problematic characters and markdown code blocks."""
+        cleaned = response_text.strip()
+        
+        # Remove markdown code blocks if present
+        if cleaned.startswith('```'):
+            # Remove opening code block marker
+            lines = cleaned.split('\n')
+            if lines[0].startswith('```'):
+                lines = lines[1:]  # Remove first line (```json or ```)
+            if lines and lines[-1].strip() == '```':
+                lines = lines[:-1]  # Remove last line (```)
+            cleaned = '\n'.join(lines)
+        
         # Replace smart quotes and other problematic characters
         replacements = {
             "'": "'",  # Left single quotation mark
@@ -203,7 +212,7 @@ class BaseDigest(ABC):
         for old_char, new_char in replacements.items():
             cleaned = cleaned.replace(old_char, new_char)
 
-        return cleaned
+        return cleaned.strip()
 
     def run(self):
         """Main execution function."""
