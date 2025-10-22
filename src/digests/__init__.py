@@ -1,4 +1,4 @@
-from .sports_digest import SportsDigest
-from .finance_digest import FinanceDigest
+from .belgium_politics_digest import BelgiumPoliticsDigest
+from .world_politics_digest import WorldPoliticsDigest
 
-__all__ = ['SportsDigest', 'FinanceDigest']
+__all__ = ['BelgiumPoliticsDigest', 'WorldPoliticsDigest']
