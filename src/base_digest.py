@@ -5,7 +5,8 @@ import feedparser
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional
 from abc import ABC, abstractmethod
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 
 class BaseDigest(ABC):
@@ -18,13 +19,14 @@ class BaseDigest(ABC):
         Args:
             config: Dictionary containing digest configuration
         """
-        # Validate API key
+        # Validate API key - the new SDK will use GEMINI_API_KEY env var automatically
         api_key = os.getenv('GEMINI_API_KEY')
         if not api_key:
             raise ValueError("GEMINI_API_KEY environment variable is required")
 
-        genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        # Create client using the new SDK
+        self.client = genai.Client(api_key=api_key)
+        self.model_name = 'gemini-2.0-flash-exp'
 
         # Get Discord webhook URL from the environment variable specified in config
         discord_webhook_env = config.get('discord_webhook_env', 'DISCORD_WEBHOOK_URL')
@@ -105,7 +107,11 @@ class BaseDigest(ABC):
         prompt = self.get_curation_prompt(articles_text)
 
         try:
-            response = self.model.generate_content(prompt)
+            # Use the new SDK method
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=prompt
+            )
             # Clean and parse JSON response
             cleaned_response = self._clean_json_response(response.text.strip())
             json_response = json.loads(cleaned_response)
