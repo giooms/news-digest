@@ -41,13 +41,15 @@ class BaseDigest(ABC):
         self.max_articles = config.get('max_articles', 15)
 
     def fetch_rss_articles(self) -> List[Dict]:
-        """Fetch articles from all RSS feeds."""
+        """Fetch articles from all RSS feeds, limiting to 10 most recent per feed."""
         all_articles = []
+        max_articles_per_feed = 10  # Limit articles per feed to avoid overloading Gemini
 
         for feed_url in self.rss_feeds:
             try:
                 print(f"Fetching from: {feed_url}")
                 feed = feedparser.parse(feed_url)
+                feed_articles = []
 
                 for entry in feed.entries:
                     # Filter articles from last 24 hours
@@ -61,9 +63,16 @@ class BaseDigest(ABC):
                         'source': feed.feed.get('title', 'Unknown source'),
                         'link': entry.get('link', ''),
                         'description': entry.get('summary', entry.get('description', 'No description')),
-                        'published': entry.get('published', 'Unknown date')
+                        'published': entry.get('published', 'Unknown date'),
+                        'published_parsed': entry.published_parsed if hasattr(entry, 'published_parsed') else None
                     }
-                    all_articles.append(article)
+                    feed_articles.append(article)
+
+                # Sort by publication date (most recent first) and take only the top 10
+                feed_articles.sort(key=lambda x: x['published_parsed'] if x['published_parsed'] else (0,)*6, reverse=True)
+                all_articles.extend(feed_articles[:max_articles_per_feed])
+                
+                print(f"  → Added {len(feed_articles[:max_articles_per_feed])} articles from this feed")
 
             except Exception as e:
                 print(f"Error fetching from {feed_url}: {str(e)}")
@@ -93,6 +102,8 @@ class BaseDigest(ABC):
 
     def process_with_gemini(self, articles: List[Dict]) -> Dict:
         """Send articles to Gemini for ranking and summarization."""
+        import time
+        
         if not articles:
             return {"articles": [], "error": "No articles found in the last 24 hours."}
 
@@ -106,26 +117,44 @@ class BaseDigest(ABC):
 
         prompt = self.get_curation_prompt(articles_text)
 
-        try:
-            # Use the new SDK method
-            response = self.client.models.generate_content(
-                model=self.model_name,
-                contents=prompt
-            )
-            # Clean and parse JSON response
-            cleaned_response = self._clean_json_response(response.text.strip())
-            json_response = json.loads(cleaned_response)
-            return json_response
+        # Retry logic for overload errors
+        max_retries = 3
+        retry_delay = 10  # seconds
+        
+        for attempt in range(max_retries):
+            try:
+                # Use the new SDK method
+                response = self.client.models.generate_content(
+                    model=self.model_name,
+                    contents=prompt
+                )
+                # Clean and parse JSON response
+                cleaned_response = self._clean_json_response(response.text.strip())
+                json_response = json.loads(cleaned_response)
+                return json_response
 
-        except json.JSONDecodeError as e:
-            print(f"Error parsing JSON from Gemini: {str(e)}")
-            print(f"Raw response: {response.text}")
-            print(f"Cleaned response: {self._clean_json_response(response.text.strip())}")
-            return {"articles": [], "error": f"Failed to parse JSON response: {str(e)}"}
+            except json.JSONDecodeError as e:
+                print(f"Error parsing JSON from Gemini: {str(e)}")
+                print(f"Raw response: {response.text}")
+                print(f"Cleaned response: {self._clean_json_response(response.text.strip())}")
+                return {"articles": [], "error": f"Failed to parse JSON response: {str(e)}"}
 
-        except Exception as e:
-            print(f"Error processing with Gemini: {str(e)}")
-            return {"articles": [], "error": f"Error processing articles: {str(e)}"}
+            except Exception as e:
+                error_msg = str(e)
+                # Check if it's an overload error
+                if "503" in error_msg or "overloaded" in error_msg.lower():
+                    if attempt < max_retries - 1:
+                        wait_time = retry_delay * (attempt + 1)  # Exponential backoff
+                        print(f"Gemini is overloaded. Retrying in {wait_time} seconds... (attempt {attempt + 1}/{max_retries})")
+                        time.sleep(wait_time)
+                        continue
+                    else:
+                        print(f"Gemini still overloaded after {max_retries} attempts")
+                        return {"articles": [], "error": f"Gemini overloaded after {max_retries} retries"}
+                else:
+                    # Other errors, don't retry
+                    print(f"Error processing with Gemini: {error_msg}")
+                    return {"articles": [], "error": f"Error processing articles: {error_msg}"}
 
     def send_to_discord(self, articles: List[Dict]):
         """Send each article as a separate embedded message to Discord."""
