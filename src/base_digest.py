@@ -117,9 +117,9 @@ class BaseDigest(ABC):
 
         prompt = self.get_curation_prompt(articles_text)
 
-        # Retry logic for overload errors
-        max_retries = 3
-        retry_delay = 10  # seconds
+        # Retry logic for rate limit and overload errors
+        max_retries = 4
+        base_retry_delay = 15  # seconds
         
         for attempt in range(max_retries):
             try:
@@ -141,16 +141,22 @@ class BaseDigest(ABC):
 
             except Exception as e:
                 error_msg = str(e)
-                # Check if it's an overload error
-                if "503" in error_msg or "overloaded" in error_msg.lower():
+                # Check if it's a retryable error (rate limit or overload)
+                is_rate_limit = "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg
+                is_overload = "503" in error_msg or "overloaded" in error_msg.lower()
+                
+                if is_rate_limit or is_overload:
                     if attempt < max_retries - 1:
-                        wait_time = retry_delay * (attempt + 1)  # Exponential backoff
-                        print(f"Gemini is overloaded. Retrying in {wait_time} seconds... (attempt {attempt + 1}/{max_retries})")
+                        # Exponential backoff with jitter
+                        wait_time = base_retry_delay * (2 ** attempt)
+                        error_type = "rate limited" if is_rate_limit else "overloaded"
+                        print(f"Gemini is {error_type}. Retrying in {wait_time} seconds... (attempt {attempt + 1}/{max_retries})")
                         time.sleep(wait_time)
                         continue
                     else:
-                        print(f"Gemini still overloaded after {max_retries} attempts")
-                        return {"articles": [], "error": f"Gemini overloaded after {max_retries} retries"}
+                        error_type = "rate limited" if is_rate_limit else "overloaded"
+                        print(f"Gemini still {error_type} after {max_retries} attempts")
+                        return {"articles": [], "error": f"Gemini {error_type} after {max_retries} retries"}
                 else:
                     # Other errors, don't retry
                     print(f"Error processing with Gemini: {error_msg}")
