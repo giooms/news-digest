@@ -26,7 +26,8 @@ class BaseDigest(ABC):
 
         # Create client using the new SDK
         self.client = genai.Client(api_key=api_key)
-        self.model_name = 'gemini-2.0-flash-exp'
+        # Using stable gemini-2.0-flash with 15 RPM limit (higher than exp's 10 RPM)
+        self.model_name = 'gemini-2.0-flash'
 
         # Get Discord webhook URL from the environment variable specified in config
         discord_webhook_env = config.get('discord_webhook_env', 'DISCORD_WEBHOOK_URL')
@@ -107,10 +108,11 @@ class BaseDigest(ABC):
         if not articles:
             return {"articles": [], "error": "No articles found in the last 24 hours."}
 
-        # Rate limit compliance: Gemini 2.0 Flash Exp has 10 RPM limit
-        # Add a delay before making the request to avoid hitting rate limits
-        print("Adding 6-second delay to comply with Gemini rate limits (10 RPM)...")
-        time.sleep(6)
+        # Rate limit compliance: Wait to ensure we're under quota
+        # If you've been testing, wait longer to let quota reset
+        initial_delay = 30  # 30 seconds to ensure quota has reset
+        print(f"Waiting {initial_delay} seconds to ensure rate limit quota is available...")
+        time.sleep(initial_delay)
 
         # Prepare articles data for Gemini
         articles_text = ""
@@ -123,8 +125,8 @@ class BaseDigest(ABC):
         prompt = self.get_curation_prompt(articles_text)
 
         # Retry logic for rate limit and overload errors
-        max_retries = 4
-        base_retry_delay = 20  # Increased from 15 to 20 seconds
+        max_retries = 5  # Increased from 4
+        base_retry_delay = 60  # Increased from 20 to 60 seconds
         
         for attempt in range(max_retries):
             try:
