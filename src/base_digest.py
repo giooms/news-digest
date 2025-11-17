@@ -38,12 +38,12 @@ class BaseDigest(ABC):
         self.digest_type = config.get('digest_type', 'General')
         self.rss_feeds = config.get('rss_feeds', [])
         self.preferences = config.get('preferences', '')
-        self.max_articles = config.get('max_articles', 15)
+        self.max_articles = config.get('max_articles', 5)
 
     def fetch_rss_articles(self) -> List[Dict]:
-        """Fetch articles from all RSS feeds, limiting to 10 most recent per feed."""
+        """Fetch articles from all RSS feeds, limiting to 5 most recent per feed."""
         all_articles = []
-        max_articles_per_feed = 10  # Limit articles per feed to avoid overloading Gemini
+        max_articles_per_feed = 5  # Limit articles per feed to stay under rate limits
 
         for feed_url in self.rss_feeds:
             try:
@@ -107,6 +107,11 @@ class BaseDigest(ABC):
         if not articles:
             return {"articles": [], "error": "No articles found in the last 24 hours."}
 
+        # Rate limit compliance: Gemini 2.0 Flash Exp has 10 RPM limit
+        # Add a delay before making the request to avoid hitting rate limits
+        print("Adding 6-second delay to comply with Gemini rate limits (10 RPM)...")
+        time.sleep(6)
+
         # Prepare articles data for Gemini
         articles_text = ""
         for i, article in enumerate(articles, 1):
@@ -119,7 +124,7 @@ class BaseDigest(ABC):
 
         # Retry logic for rate limit and overload errors
         max_retries = 4
-        base_retry_delay = 15  # seconds
+        base_retry_delay = 20  # Increased from 15 to 20 seconds
         
         for attempt in range(max_retries):
             try:
