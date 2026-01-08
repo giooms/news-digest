@@ -26,8 +26,8 @@ class BaseDigest(ABC):
 
         # Create client using the new SDK
         self.client = genai.Client(api_key=api_key)
-        # Using stable gemini-2.0-flash with 15 RPM limit (higher than exp's 10 RPM)
-        self.model_name = 'gemini-2.0-flash'
+        # Using gemini-2.0-flash-lite: 30 RPM, 1M TPM, 200 RPD - best for daily automation
+        self.model_name = 'gemini-2.0-flash-lite'
 
         # Get Discord webhook URL from the environment variable specified in config
         discord_webhook_env = config.get('discord_webhook_env', 'DISCORD_WEBHOOK_URL')
@@ -42,9 +42,9 @@ class BaseDigest(ABC):
         self.max_articles = config.get('max_articles', 5)
 
     def fetch_rss_articles(self) -> List[Dict]:
-        """Fetch articles from all RSS feeds, limiting to 5 most recent per feed."""
+        """Fetch articles from all RSS feeds, limiting to 3 most recent per feed."""
         all_articles = []
-        max_articles_per_feed = 5  # Limit articles per feed to stay under rate limits
+        max_articles_per_feed = 3  # Reduced to 3 to minimize token usage and stay under RPD limits
 
         for feed_url in self.rss_feeds:
             try:
@@ -108,10 +108,10 @@ class BaseDigest(ABC):
         if not articles:
             return {"articles": [], "error": "No articles found in the last 24 hours."}
 
-        # Rate limit compliance: Wait to ensure we're under quota
-        # If you've been testing, wait longer to let quota reset
-        initial_delay = 30  # 30 seconds to ensure quota has reset
-        print(f"Waiting {initial_delay} seconds to ensure rate limit quota is available...")
+        # Rate limit compliance: Minimal delay since digests are now 2 hours apart
+        # With gemini-2.0-flash-lite (30 RPM), we have more headroom
+        initial_delay = 5  # 5 seconds - just enough to avoid burst issues
+        print(f"Waiting {initial_delay} seconds before Gemini API call...")
         time.sleep(initial_delay)
 
         # Prepare articles data for Gemini
@@ -125,8 +125,8 @@ class BaseDigest(ABC):
         prompt = self.get_curation_prompt(articles_text)
 
         # Retry logic for rate limit and overload errors
-        max_retries = 5  # Increased from 4
-        base_retry_delay = 60  # Increased from 20 to 60 seconds
+        max_retries = 3  # Reduced since we have better spacing
+        base_retry_delay = 120  # 2 minutes base - if rate limited, likely hit RPD quota
         
         for attempt in range(max_retries):
             try:

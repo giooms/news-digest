@@ -1,6 +1,6 @@
 {
     "digest_type": "Belgium Politics",
-    "max_articles": 5,
+    "max_articles": 3,
     "rss_feeds": [
         "https://www.lecho.be/rss/politique_belgique.xml",
         "https://www.lalibre.be/arc/outboundfeeds/rss/section/belgique/?outputType=xml",
