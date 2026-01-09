@@ -116,9 +116,9 @@ class BaseDigest(ABC):
         if not articles:
             return {"articles": [], "error": "No articles found in the last 24 hours."}
 
-        # Rate limit compliance: Minimal delay since digests are now 2 hours apart
-        # With gemini-2.0-flash-lite (30 RPM), we have more headroom
-        initial_delay = 5  # 5 seconds - just enough to avoid burst issues
+        # Rate limit compliance: Wait to ensure quota is available
+        # Even with 2 hours apart, we need to ensure no residual quota issues
+        initial_delay = 60  # 60 seconds to guarantee clean quota state
         print(f"Waiting {initial_delay} seconds before Gemini API call...")
         time.sleep(initial_delay)
 
@@ -157,7 +157,7 @@ class BaseDigest(ABC):
             except Exception as e:
                 error_msg = str(e)
                 # Check if it's a retryable error (rate limit or overload)
-                is_rate_limit = "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg
+                is_rate_limit = "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg or "TooManyRequests" in error_msg
                 is_overload = "503" in error_msg or "overloaded" in error_msg.lower()
                 
                 if is_rate_limit or is_overload:
