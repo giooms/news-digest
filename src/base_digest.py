@@ -43,11 +43,19 @@ class BaseDigest(ABC):
 
     def fetch_rss_articles(self) -> List[Dict]:
         """Fetch articles from all RSS feeds, limiting to 3 most recent per feed."""
+        import time
+        
         all_articles = []
         max_articles_per_feed = 3  # Reduced to 3 to minimize token usage and stay under RPD limits
 
-        for feed_url in self.rss_feeds:
+        for i, feed_url in enumerate(self.rss_feeds):
             try:
+                # Add delay between RSS feed fetches to avoid overwhelming APIs
+                if i > 0:
+                    delay = 2  # 2 seconds between feeds
+                    print(f"Waiting {delay} seconds before next feed...")
+                    time.sleep(delay)
+                
                 print(f"Fetching from: {feed_url}")
                 feed = feedparser.parse(feed_url)
                 feed_articles = []
