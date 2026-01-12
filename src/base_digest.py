@@ -26,8 +26,8 @@ class BaseDigest(ABC):
 
         # Create client using the new SDK
         self.client = genai.Client(api_key=api_key)
-        # Using gemini-2.5-flash-lite: 10 RPM, 250K TPM, 20 RPD - available in your account
-        self.model_name = 'gemini-2.5-flash-lite'
+        # Using gemini-2.5-flash: 5 RPM, 250K TPM, 20 RPD - confirmed available
+        self.model_name = 'gemini-2.5-flash'
 
         # Get Discord webhook URL from the environment variable specified in config
         discord_webhook_env = config.get('discord_webhook_env', 'DISCORD_WEBHOOK_URL')
@@ -116,9 +116,9 @@ class BaseDigest(ABC):
         if not articles:
             return {"articles": [], "error": "No articles found in the last 24 hours."}
 
-        # Rate limit compliance: Wait to ensure quota is available
-        # gemini-2.5-flash-lite has only 10 RPM - we need significant delay
-        initial_delay = 90  # 90 seconds to guarantee quota window reset
+        # Rate limit compliance: CRITICAL - wait long enough to guarantee success
+        # gemini-2.5-flash has only 5 RPM and 20 RPD - extremely conservative approach
+        initial_delay = 120  # 2 minutes to absolutely guarantee quota availability
         print(f"Waiting {initial_delay} seconds before Gemini API call...")
         time.sleep(initial_delay)
 
@@ -132,51 +132,36 @@ class BaseDigest(ABC):
 
         prompt = self.get_curation_prompt(articles_text)
 
-        # Retry logic for rate limit and overload errors
-        # With only 10 RPM and 20 RPD, we must be extremely conservative
-        max_retries = 1  # Only 1 retry = max 2 attempts total
-        base_retry_delay = 300  # 5 minutes base - ensures we're under 10 RPM limit
-        
-        for attempt in range(max_retries):
-            try:
-                # Use the new SDK method
-                response = self.client.models.generate_content(
-                    model=self.model_name,
-                    contents=prompt
-                )
-                # Clean and parse JSON response
-                cleaned_response = self._clean_json_response(response.text.strip())
-                json_response = json.loads(cleaned_response)
-                return json_response
+        # Single attempt only - no retries due to strict quota limits
+        try:
+            print("Making single Gemini API call (no retries enabled)...")
+            # Use the new SDK method
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=prompt
+            )
+            # Clean and parse JSON response
+            cleaned_response = self._clean_json_response(response.text.strip())
+            json_response = json.loads(cleaned_response)
+            print("✓ Gemini API call successful")
+            return json_response
 
-            except json.JSONDecodeError as e:
-                print(f"Error parsing JSON from Gemini: {str(e)}")
-                print(f"Raw response: {response.text}")
-                print(f"Cleaned response: {self._clean_json_response(response.text.strip())}")
-                return {"articles": [], "error": f"Failed to parse JSON response: {str(e)}"}
+        except json.JSONDecodeError as e:
+            print(f"Error parsing JSON from Gemini: {str(e)}")
+            print(f"Raw response: {response.text}")
+            print(f"Cleaned response: {self._clean_json_response(response.text.strip())}")
+            return {"articles": [], "error": f"Failed to parse JSON response: {str(e)}"}
 
-            except Exception as e:
-                error_msg = str(e)
-                # Check if it's a retryable error (rate limit or overload)
-                is_rate_limit = "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg or "TooManyRequests" in error_msg
-                is_overload = "503" in error_msg or "overloaded" in error_msg.lower()
-                
-                if is_rate_limit or is_overload:
-                    if attempt < max_retries - 1:
-                        # Exponential backoff with jitter
-                        wait_time = base_retry_delay * (2 ** attempt)
-                        error_type = "rate limited" if is_rate_limit else "overloaded"
-                        print(f"Gemini is {error_type}. Retrying in {wait_time} seconds... (attempt {attempt + 1}/{max_retries})")
-                        time.sleep(wait_time)
-                        continue
-                    else:
-                        error_type = "rate limited" if is_rate_limit else "overloaded"
-                        print(f"Gemini still {error_type} after {max_retries} attempts")
-                        return {"articles": [], "error": f"Gemini {error_type} after {max_retries} retries"}
-                else:
-                    # Other errors, don't retry
-                    print(f"Error processing with Gemini: {error_msg}")
-                    return {"articles": [], "error": f"Error processing articles: {error_msg}"}
+        except Exception as e:
+            error_msg = str(e)
+            print(f"✗ Gemini API call failed: {error_msg}")
+            # Check if it's a rate limit error
+            is_rate_limit = "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg or "TooManyRequests" in error_msg
+            
+            if is_rate_limit:
+                return {"articles": [], "error": f"Rate limit exceeded. Please wait before next digest. Error: {error_msg}"}
+            else:
+                return {"articles": [], "error": f"Error processing articles: {error_msg}"}
 
     def send_to_discord(self, articles: List[Dict]):
         """Send each article as a separate embedded message to Discord."""
