@@ -117,8 +117,8 @@ class BaseDigest(ABC):
             return {"articles": [], "error": "No articles found in the last 24 hours."}
 
         # Rate limit compliance: Wait to ensure quota is available
-        # Even with 2 hours apart, we need to ensure no residual quota issues
-        initial_delay = 60  # 60 seconds to guarantee clean quota state
+        # gemini-2.5-flash-lite has only 10 RPM - we need significant delay
+        initial_delay = 90  # 90 seconds to guarantee quota window reset
         print(f"Waiting {initial_delay} seconds before Gemini API call...")
         time.sleep(initial_delay)
 
@@ -133,8 +133,9 @@ class BaseDigest(ABC):
         prompt = self.get_curation_prompt(articles_text)
 
         # Retry logic for rate limit and overload errors
-        max_retries = 3  # Reduced since we have better spacing
-        base_retry_delay = 120  # 2 minutes base - if rate limited, likely hit RPD quota
+        # With only 10 RPM and 20 RPD, we must be extremely conservative
+        max_retries = 1  # Only 1 retry = max 2 attempts total
+        base_retry_delay = 300  # 5 minutes base - ensures we're under 10 RPM limit
         
         for attempt in range(max_retries):
             try:
