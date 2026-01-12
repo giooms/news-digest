@@ -26,8 +26,8 @@ class BaseDigest(ABC):
 
         # Create client using the new SDK
         self.client = genai.Client(api_key=api_key)
-        # Using gemini-2.0-flash-lite: 30 RPM, 1M TPM, 200 RPD - best for daily automation
-        self.model_name = 'gemini-2.0-flash-lite'
+        # Using gemini-2.5-flash-lite: 10 RPM, 250K TPM, 20 RPD - available in your account
+        self.model_name = 'gemini-2.5-flash-lite'
 
         # Get Discord webhook URL from the environment variable specified in config
         discord_webhook_env = config.get('discord_webhook_env', 'DISCORD_WEBHOOK_URL')
